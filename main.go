@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"log"
@@ -40,6 +41,7 @@ func (c *Context) Env() map[string]string {
 var (
 	buildVersion string
 	version      bool
+	insecure     bool
 	poll         bool
 	wg           sync.WaitGroup
 
@@ -114,8 +116,15 @@ func waitForDependencies() {
 			case "http", "https":
 				wg.Add(1)
 				go func(u url.URL) {
+
+					config := &tls.Config{
+						InsecureSkipVerify: insecure,
+					}
+
+					tr := &http.Transport{TLSClientConfig: config}
 					client := &http.Client{
-						Timeout: waitTimeoutFlag,
+						Transport: tr,
+						Timeout:   waitTimeoutFlag,
 					}
 
 					defer wg.Done()
@@ -209,6 +218,7 @@ Arguments:
 func main() {
 
 	flag.BoolVar(&version, "version", false, "show version")
+	flag.BoolVar(&insecure, "insecure-ssl", false, "Accept/Ignore all server SSL certificates")
 	flag.BoolVar(&poll, "poll", false, "enable polling")
 
 	flag.Var(&templatesFlag, "template", "Template (/template:/dest). Can be passed multiple times. Does also support directories")
