@@ -26,4 +26,6 @@ _testmain.go
 
 # Created by .ignore support plugin (hsz.mobi)
 
-dockerize
+dockerize-*.tar.gz
+SHA256SUMS
+dist/

@@ -1,5 +1,7 @@
-name: Go
+name: Build and Release
+
 on: [push]
+
 jobs:
 
   build:
@@ -18,14 +20,22 @@ jobs:
 
     - name: Get dependencies
       run: |
-        #go get -v -t -d ./...
         make deps
-        if [ -f Gopkg.toml ]; then
-            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-            dep ensure
-        fi
 
     - name: Build
       run: |
-        #go build -v .
-        make dist
+        make release
+
+    - name: Generate Changelog
+      run: echo "# Changelog" > ${{ github.workflow }}-CHANGELOG.txt
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          dockerize-*.tar.gz
+          SHA256SUMS
+        body_path: ${{ github.workflow }}-CHANGELOG.txt
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
