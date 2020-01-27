@@ -5,8 +5,7 @@ RUN apk -U add openssl git
 ADD . /go/src/github.com/primeroz/dockerize
 WORKDIR /go/src/github.com/primeroz/dockerize
 
-RUN go get github.com/robfig/glock
-RUN glock sync -n < GLOCKFILE
+RUN go mod download
 RUN go install
 
 FROM alpine:3.11
